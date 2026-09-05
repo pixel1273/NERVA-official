@@ -1,0 +1,249 @@
+.install-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 6rem;
+}
+
+/* Status Grid */
+.install-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.install-status-card {
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.status-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-value {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+}
+
+/* Install CTA */
+.install-cta {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-color: rgba(0, 255, 102, 0.3);
+  flex-wrap: wrap;
+}
+
+.cta-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.cta-content h3 {
+  margin-bottom: 0.25rem;
+}
+
+.cta-content p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.cta-icon-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 255, 102, 0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(0, 255, 102, 0.6)); }
+}
+
+.install-cta-btn {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+/* Features */
+.install-features {
+  margin-top: 2rem;
+}
+
+.features-title {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.feature-card {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.feature-card h4 {
+  font-size: 0.95rem;
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* Instructions */
+.install-instructions {
+  margin-top: 2rem;
+  padding: 1.5rem;
+}
+
+.install-instructions h3 {
+  margin-bottom: 1.25rem;
+}
+
+.instructions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.instruction-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 255, 102, 0.15);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.instruction-step strong {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.instruction-step p {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* APK Download Section */
+.install-apk-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+}
+
+.apk-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.apk-content h3 {
+  margin-bottom: 0.25rem;
+}
+
+.apk-content p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.apk-note {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.apk-badge {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--risk-medium);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.apk-note p {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* Slide-down animation for banner */
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .install-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .install-cta {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cta-content {
+    flex-direction: column;
+  }
+
+  .install-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

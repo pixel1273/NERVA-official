@@ -1,0 +1,122 @@
+.fleet-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fleet-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reroute-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fleet-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.fleet-stat {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.fleet-table-container {
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.fleet-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fleet-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.fleet-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 0.9rem;
+}
+
+.fleet-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.vehicle-id {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+.coords {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.fleet-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.reroute-result {
+  padding: 1.5rem;
+  border: 1px solid var(--border-active);
+}
+
+.reroute-result h3 {
+  margin-bottom: 0.5rem;
+}
+
+.reroute-summary {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.reroute-item {
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.new-route {
+  font-size: 0.85rem;
+  color: var(--accent-primary);
+  margin-top: 0.25rem;
+}
