@@ -34,42 +34,38 @@ An AI-driven platform to **predict** disruptions, **optimize** logistics routing
 graph TD
     %% Data Sources
     subgraph Data Sources
-        IMD[IMD Weather]
+        IMD[IMD Weather API]
         ISRO[ISRO Satellite]
-        GSI[GSI Geology]
-        OSM[OpenStreetMap]
+        OSM[OpenStreetMap / Leaflet]
     end
 
     %% Backend & ML
-    subgraph Core Engine
-        API[API Gateway - Nginx]
-        Node[Node.js Express API]
-        FastAPI[Python FastAPI - ML/AI]
-        DB[(PostGIS / MongoDB)]
-        Cache[Redis & Celery]
+    subgraph Core Engine - Python FastAPI
+        API[FastAPI REST API]
+        ML[ML Engine - XGBoost / PyTorch]
+        AI[Gemini AI - LiteLLM]
+        DB[(SQLite - nerva.db)]
+        Auth[JWT Auth - python-jose]
     end
 
     %% Frontends
     subgraph User Interfaces
-        Web[GIS Web Dashboard]
-        Mobile[Mobile Field App Offline]
-        Alerts[Alert Engine SMS/Push]
+        Web[React + Vite Web Dashboard]
+        Android[Android App - Kotlin / Compose]
+        Alerts[In-App Alert Engine]
     end
 
-    IMD --> FastAPI
-    ISRO --> FastAPI
-    GSI --> FastAPI
-    OSM --> DB
+    IMD --> API
+    ISRO --> ML
+    OSM --> Web
 
-    FastAPI <--> DB
-    Node <--> DB
-    Node <--> Cache
-
-    API --> Node
-    API --> FastAPI
+    API <--> DB
+    API --> ML
+    API --> AI
+    API --> Auth
 
     Web <--> API
-    Mobile <--> API
+    Android <--> API
     API --> Alerts
 ```
 
@@ -77,13 +73,12 @@ graph TD
 
 ## Slide 4: Tech Stack
 
-- **Frontend:** React.js, Mapbox GL JS, D3.js, React Native, PWA
-- **Backend:** Node.js (Express), Python (FastAPI), Socket.IO
-- **Databases:** PostgreSQL (PostGIS), MongoDB, Redis
-- **AI / ML:** TensorFlow / PyTorch, Scikit-learn, OpenCV, ONNX Runtime
-- **Geospatial:** GeoServer, GDAL/OGR, OpenRouteService
-- **DevOps & Edge:** Docker, Kubernetes, AWS S3, SQLite / WatermelonDB
-
+- **Frontend:** React 19, Vite, React-Leaflet (Maps), Recharts, React Router DOM, PWA
+- **Backend:** Python FastAPI, Uvicorn, NetworkX (route optimization)
+- **Database:** SQLite (`nerva.db`) — designed for PostGIS migration
+- **AI / ML:** XGBoost, PyTorch, Transformers (HuggingFace), Pillow, Gemini API (via LiteLLM)
+- **Auth & Security:** JWT (python-jose), Bcrypt (passlib), python-dotenv
+- 
 ---
 
 ## Slide 5: Impact & Performance Metrics (Graphs)
