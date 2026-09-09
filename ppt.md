@@ -73,12 +73,13 @@ graph TD
 
 ## Slide 4: Tech Stack
 
-- **Frontend:** React 19, Vite, React-Leaflet (Maps), Recharts, React Router DOM, PWA
-- **Backend:** Python FastAPI, Uvicorn, NetworkX (route optimization)
-- **Database:** SQLite (`nerva.db`) — designed for PostGIS migration
-- **AI / ML:** XGBoost, PyTorch, Transformers (HuggingFace), Pillow, Gemini API (via LiteLLM)
+- **Frontend:** React 19, Vite, React-Leaflet (Maps), Recharts, PWA (Offline-First)
+- **Backend:** Python FastAPI, Uvicorn, WebSockets (Real-time updates)
+- **Database & Cache:** PostgreSQL with PostGIS, Redis (Caching)
+- **AI / ML:** XGBoost, PyTorch, Transformers, Gemini API (via LiteLLM)
+- **DevOps:** Docker, Docker Compose
 - **Auth & Security:** JWT (python-jose), Bcrypt (passlib), python-dotenv
-- 
+
 ---
 
 ## Slide 5: Impact & Performance Metrics (Graphs)
