@@ -25,25 +25,33 @@ class OmniRouteEngine:
         roads = [
             # Sikkim corridor
             ("Siliguri", "Gangtok", 110, 0.6, 0.2),
-            # Assam main artery
+            # Assam main artery (NH-27 / NH-37)
             ("Siliguri", "Guwahati", 470, 0.1, 0.1),
+            ("Guwahati", "Nagaon", 120, 0.1, 0.1),
             ("Guwahati", "Tezpur", 180, 0.1, 0.1),
+            ("Nagaon", "Jorhat", 140, 0.15, 0.1),
             ("Tezpur", "Jorhat", 150, 0.2, 0.1),
             ("Jorhat", "Dibrugarh", 140, 0.1, 0.1),
+            ("Dibrugarh", "Tinsukia", 50, 0.1, 0.05),
             # Meghalaya
             ("Guwahati", "Shillong", 100, 0.3, 0.2),
             ("Guwahati", "Tura", 200, 0.2, 0.1),
             ("Shillong", "Tura", 220, 0.4, 0.2),
             # Arunachal Pradesh
             ("Tezpur", "Itanagar", 170, 0.5, 0.3),
+            ("Tezpur", "Tawang", 320, 0.7, 0.4),
             # Nagaland
             ("Guwahati", "Dimapur", 290, 0.2, 0.1),
             ("Dimapur", "Kohima", 74, 0.8, 0.4),
+            ("Dimapur", "Mokokchung", 160, 0.5, 0.3),
+            ("Jorhat", "Mokokchung", 120, 0.4, 0.2),
             # Manipur
             ("Kohima", "Imphal", 140, 0.7, 0.3),
             ("Silchar", "Imphal", 260, 0.8, 0.4),
+            ("Imphal", "Churachandpur", 60, 0.5, 0.2),
             # Mizoram
             ("Silchar", "Aizawl", 180, 0.6, 0.3),
+            ("Aizawl", "Lunglei", 160, 0.65, 0.35),
             # Tripura
             ("Silchar", "Agartala", 250, 0.4, 0.2),
             # Silchar connections

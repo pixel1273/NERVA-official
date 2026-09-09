@@ -106,47 +106,81 @@ class NERVATranslator:
         return translations
 
     async def _translate_api(self, text: str, target_language_name: str) -> str:
-        """Translate using LiteLLM (Gemini/GPT API)."""
+        """
+        Translate using LiteLLM (Gemini/GPT API) with automatic key rotation.
+
+        Tries all available API keys in sequence. If one key fails (rate limit,
+        expired, etc.), it's marked as failed and the next key is tried immediately.
+        """
         try:
             from litellm import acompletion
-
-            # Determine which model to use based on available API keys
-            if os.getenv("GEMINI_API_KEY"):
-                model = "gemini/gemini-2.0-flash"
-                api_key = os.getenv("GEMINI_API_KEY")
-            elif os.getenv("OPENAI_API_KEY"):
-                model = "gpt-4o-mini"
-                api_key = os.getenv("OPENAI_API_KEY")
-            else:
-                raise ValueError(
-                    "No API key found. Set GEMINI_API_KEY or OPENAI_API_KEY environment variable."
-                )
-
-            messages = [
-                {
-                    "role": "system",
-                    "content": (
-                        f"You are a professional translator for disaster management communications in India's North Eastern Region. "
-                        f"Translate the following English text to {target_language_name}. "
-                        f"Use simple, clear language suitable for emergency alerts. "
-                        f"Return ONLY the translated text, nothing else."
-                    ),
-                },
-                {"role": "user", "content": text},
-            ]
-
-            response = await acompletion(
-                model=model,
-                messages=messages,
-                api_key=api_key,
-                temperature=0.1,  # Low temperature for accurate translation
-                max_tokens=500,
-            )
-
-            return response.choices[0].message.content.strip()
-
         except ImportError:
             raise ImportError("litellm package not installed. Run: pip install litellm")
+
+        from ..api_keys import key_manager
+
+        keys_to_try = key_manager.get_all_keys_to_try()
+        if not keys_to_try:
+            raise ValueError(
+                "No API keys available. Set GEMINI_API_KEYS (comma-separated) "
+                "or GEMINI_API_KEY in your .env file."
+            )
+
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    f"You are a professional translator for disaster management communications in India's North Eastern Region. "
+                    f"Translate the following English text to {target_language_name}. "
+                    f"Use simple, clear language suitable for emergency alerts. "
+                    f"Return ONLY the translated text, nothing else."
+                ),
+            },
+            {"role": "user", "content": text},
+        ]
+
+        last_error = None
+        for provider, model, api_key in keys_to_try:
+            try:
+                logger.info(f"Trying {provider} key ...{api_key[-6:]}")
+
+                response = await acompletion(
+                    model=model,
+                    messages=messages,
+                    api_key=api_key,
+                    temperature=0.1,  # Low temperature for accurate translation
+                    max_tokens=500,
+                )
+
+                # Key worked — mark it as healthy
+                key_manager.mark_key_success(api_key)
+                return response.choices[0].message.content.strip()
+
+            except Exception as e:
+                last_error = e
+                error_msg = str(e).lower()
+                # Check if this is a key-related failure (rate limit, auth, quota)
+                is_key_error = any(
+                    keyword in error_msg
+                    for keyword in ["rate limit", "quota", "429", "401", "403", "invalid", "expired", "exhausted"]
+                )
+
+                if is_key_error:
+                    logger.warning(
+                        f"{provider} key ...{api_key[-6:]} failed ({e}). "
+                        f"Rotating to next key..."
+                    )
+                    key_manager.mark_key_failed(api_key)
+                else:
+                    # Non-key error (network, server error, etc.) — don't blame the key
+                    logger.error(f"Translation failed with non-key error: {e}")
+                    raise
+
+        # All keys exhausted
+        raise RuntimeError(
+            f"All API keys exhausted ({len(keys_to_try)} tried). "
+            f"Last error: {last_error}"
+        )
 
     def _translate_local(self, text: str, target_lang: str) -> str:
         """Translate using local IndicTrans2 model."""

@@ -185,3 +185,60 @@
   display: block;
   margin-top: 0.3rem;
 }
+
+/* Auto-Translate button */
+.btn-translate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.12), rgba(0, 200, 255, 0.08));
+  color: var(--accent-primary, #00FF66);
+  border: 1px dashed rgba(0, 255, 102, 0.4);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-translate:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.2), rgba(0, 200, 255, 0.14));
+  border-color: rgba(0, 255, 102, 0.6);
+}
+
+.btn-translate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinner animation */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* District city label */
+.district-city {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Grouped dropdown */
+.district-picker optgroup {
+  font-weight: 700;
+  color: var(--accent-primary, #00FF66);
+  background: var(--bg-panel, #1a1a1a);
+}
+
+.district-picker option {
+  font-weight: 400;
+  color: var(--text-primary);
+  padding: 0.3rem;
+}

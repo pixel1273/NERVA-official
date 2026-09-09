@@ -10,6 +10,11 @@
   z-index: 1;
 }
 
+/* Dark theme filter for free OpenStreetMap tiles — no API key needed */
+.dark-map-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.2) saturate(0.3);
+}
+
 /* Override Leaflet styles for dark theme */
 .ner-map .leaflet-popup-content-wrapper {
   background: #1a1a1a;
@@ -32,22 +37,41 @@
   color: #fff !important;
 }
 
-/* Custom tooltip */
+/* Custom tooltip for cities (permanent text labels) */
 .ner-tooltip {
-  background: rgba(0, 0, 0, 0.85) !important;
-  color: #00FF66 !important;
-  border: 1px solid rgba(0, 255, 102, 0.3) !important;
-  border-radius: 6px !important;
-  padding: 4px 10px !important;
-  font-family: 'Space Grotesk', sans-serif !important;
-  font-weight: 600 !important;
-  font-size: 12px !important;
+  background: transparent !important;
+  color: #ccc !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 11px !important;
+  padding: 0 !important;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 .ner-tooltip::before {
-  border-top-color: rgba(0, 0, 0, 0.85) !important;
+  display: none !important;
+}
+
+/* State label */
+.ner-state-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.25) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+
+.ner-state-label::before {
+  display: none !important;
 }
 
 /* Map legend */

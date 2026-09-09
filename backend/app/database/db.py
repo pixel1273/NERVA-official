@@ -6,9 +6,12 @@ import sqlite3
 import os
 import json
 from datetime import datetime
+from dotenv import load_dotenv
 from ..auth import get_password_hash
 
+
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "nerva.db")
+
 
 
 def get_connection():

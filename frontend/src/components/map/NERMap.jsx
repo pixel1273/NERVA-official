@@ -1,24 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './NERMap.css';
 
-// NER node coordinates (lat, lng) for road network visualization
+// NER node coordinates (lat, lng) for road network visualization — all 8 NE states
 const NODE_COORDS = {
-  Siliguri:  [26.7271, 88.3953],
-  Gangtok:   [27.3389, 88.6065],
-  Guwahati:  [26.1445, 91.7362],
-  Shillong:  [25.5788, 91.8933],
-  Tura:      [25.5144, 90.2187],
-  Tezpur:    [26.6338, 92.7897],
-  Itanagar:  [27.1000, 93.6167],
-  Jorhat:    [26.7509, 94.2037],
-  Dibrugarh: [27.4728, 94.9120],
-  Dimapur:   [25.9042, 93.7266],
-  Kohima:    [25.6751, 94.1086],
-  Imphal:    [24.8170, 93.9368],
-  Silchar:   [24.8333, 92.7789],
-  Aizawl:    [23.7271, 92.7176],
-  Agartala:  [23.8315, 91.2868],
+  // Sikkim
+  Gangtok:       [27.3389, 88.6065],
+  // West Bengal gateway
+  Siliguri:      [26.7271, 88.3953],
+  // Assam
+  Guwahati:      [26.1445, 91.7362],
+  Tezpur:        [26.6338, 92.7897],
+  Nagaon:        [26.3500, 92.6840],
+  Jorhat:        [26.7509, 94.2037],
+  Dibrugarh:     [27.4728, 94.9120],
+  Tinsukia:      [27.4922, 95.3547],
+  Silchar:       [24.8333, 92.7789],
+  // Meghalaya
+  Shillong:      [25.5788, 91.8933],
+  Tura:          [25.5144, 90.2187],
+  // Arunachal Pradesh
+  Itanagar:      [27.1000, 93.6167],
+  Tawang:        [27.5860, 91.8595],
+  // Nagaland
+  Dimapur:       [25.9042, 93.7266],
+  Kohima:        [25.6751, 94.1086],
+  Mokokchung:    [26.3225, 94.5204],
+  // Manipur
+  Imphal:        [24.8170, 93.9368],
+  Churachandpur: [24.3337, 93.6833],
+  // Mizoram
+  Aizawl:        [23.7271, 92.7176],
+  Lunglei:       [22.8839, 92.7275],
+  // Tripura
+  Agartala:      [23.8315, 91.2868],
 };
+
+// State label coordinates
+const STATE_LABELS = {
+  'Sikkim': [27.5330, 88.5122],
+  'Assam': [26.2006, 92.9376],
+  'Meghalaya': [25.4670, 91.3662],
+  'Arunachal Pradesh': [28.2180, 94.7278],
+  'Nagaland': [26.1584, 94.5624],
+  'Manipur': [24.6637, 93.9063],
+  'Mizoram': [23.1645, 92.9376],
+  'Tripura': [23.9408, 91.9882],
+};
+
+// Bounding box for North East India (restricts map panning)
+const NE_BOUNDS = [
+  [21.5, 87.5],  // South-West corner
+  [29.5, 97.5],  // North-East corner
+];
 
 // Severity colors
 const SEVERITY_COLORS = {
@@ -71,17 +104,21 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
 
       if (mapInstanceRef.current) return; // Already initialized
 
-      // Initialize map centered on NER
+      // Initialize map centered on NER, bounded to NE India only
       const map = L.map(mapRef.current, {
         zoomControl: true,
         attributionControl: true,
+        maxBounds: NE_BOUNDS,
+        maxBoundsViscosity: 0.9,
+        minZoom: 6,
+        maxZoom: 18,
       }).setView([25.5, 92.5], 7);
 
-      // Dark-themed tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+      // Free CartoDB Dark Matter No Labels — no API key needed
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
         subdomains: 'abcd',
-        maxZoom: 19,
+        maxZoom: 18,
       }).addTo(map);
 
       mapInstanceRef.current = map;
@@ -149,6 +186,24 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
       layersRef.current.push(line);
     });
 
+    // --- Draw State Labels ---
+    Object.entries(STATE_LABELS).forEach(([name, coords]) => {
+      const marker = L.circleMarker(coords, {
+        radius: 0,
+        opacity: 0,
+        fillOpacity: 0
+      }).addTo(map);
+
+      marker.bindTooltip(name, {
+        permanent: true,
+        direction: 'center',
+        className: 'ner-state-label',
+        interactive: false
+      });
+
+      layersRef.current.push(marker);
+    });
+
     // --- Draw Node markers ---
     Object.entries(NODE_COORDS).forEach(([name, coords]) => {
       const marker = L.circleMarker(coords, {
@@ -160,10 +215,10 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
       }).addTo(map);
 
       marker.bindTooltip(name, {
-        permanent: false,
-        direction: 'top',
+        permanent: true,
+        direction: 'right',
         className: 'ner-tooltip',
-        offset: [0, -8],
+        offset: [8, 0],
       });
 
       layersRef.current.push(marker);

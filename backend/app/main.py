@@ -1,4 +1,7 @@
 
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before anything else reads env vars
+
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -406,3 +409,15 @@ def get_seasonal_analytics():
         "road_blocks": [10, 12, 15, 25, 50, 90, 110, 100, 60, 30, 15, 10],
         "impact_score": [1.5, 1.8, 2.5, 4.0, 7.5, 9.2, 9.8, 9.5, 6.5, 4.2, 2.0, 1.6]
     }
+
+
+# ─────────────────────────────────────────────────────────
+# API KEY STATUS (Admin monitoring)
+# ─────────────────────────────────────────────────────────
+
+@app.get("/api/system/api-keys/status", tags=["System"], dependencies=[Depends(RoleChecker([ROLE_COMMAND]))])
+def get_api_key_status():
+    """Check the health and availability of configured API keys (admin only)."""
+    from .api_keys import key_manager
+    return key_manager.status()
+
