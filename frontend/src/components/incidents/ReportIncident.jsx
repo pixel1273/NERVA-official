@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, MapPin, Send, AlertTriangle, X, WifiOff } from 'lucide-react';
-import { createIncidentWithAI } from '../../data/api';
+import { createIncidentWithAI, classifyImage } from '../../data/api';
 import { saveToOfflineQueue } from '../../data/offlineQueue';
 import './Incidents.css';
 
@@ -22,6 +22,8 @@ export function ReportIncident() {
   const [location, setLocation] = useState({ lat: null, lng: null, name: '' });
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [analyzingImage, setAnalyzingImage] = useState(false);
+  const [imageAnalysis, setImageAnalysis] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -55,13 +57,31 @@ export function ReportIncident() {
     );
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
+
+      setAnalyzingImage(true);
+      setImageAnalysis(null);
+      try {
+        const aiResult = await classifyImage(file);
+        setImageAnalysis(aiResult);
+        
+        // Auto-populate form based on AI result
+        setFormData(prev => ({
+          ...prev,
+          type: aiResult.damage_type === 'clear' ? 'road_damage' : aiResult.damage_type,
+          severity: aiResult.severity
+        }));
+      } catch (err) {
+        console.error("AI classification failed:", err);
+      } finally {
+        setAnalyzingImage(false);
+      }
     }
   };
 
@@ -166,9 +186,19 @@ export function ReportIncident() {
             {imagePreview ? (
               <div style={styles.previewContainer}>
                 <img src={imagePreview} alt="Preview" style={styles.previewImage} />
-                <button type="button" onClick={() => {setImage(null); setImagePreview(null);}} style={styles.removeBtn}>
+                <button type="button" onClick={() => {setImage(null); setImagePreview(null); setImageAnalysis(null);}} style={styles.removeBtn}>
                   <X size={20} />
                 </button>
+                {analyzingImage && (
+                  <div style={styles.aiBadgeAnalyzing}>
+                    ⏳ AI analyzing photo...
+                  </div>
+                )}
+                {imageAnalysis && !analyzingImage && (
+                  <div style={styles.aiBadgeResult}>
+                    🤖 <strong>AI Detected:</strong> {imageAnalysis.damage_type} ({imageAnalysis.severity} severity • {(imageAnalysis.confidence * 100).toFixed(0)}% conf)
+                  </div>
+                )}
               </div>
             ) : (
               <label style={styles.uploadLabel}>
@@ -354,6 +384,37 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  aiBadgeAnalyzing: {
+    position: 'absolute',
+    bottom: '10px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    color: 'var(--accent-primary)',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    backdropFilter: 'blur(4px)',
+    whiteSpace: 'nowrap',
+    zIndex: 10,
+  },
+  aiBadgeResult: {
+    position: 'absolute',
+    bottom: '10px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    backdropFilter: 'blur(4px)',
+    whiteSpace: 'nowrap',
+    zIndex: 10,
   },
   inputGroup: {
     display: 'flex',

@@ -32,50 +32,25 @@ class ImageSeverityClassifier:
 
     def __init__(self):
         self.model = None
-        self.transform = None
+        self.processor = None
         self.is_loaded = False
-        self._model_dir = os.path.join(os.path.dirname(__file__), "models")
-        self._model_path = os.path.join(self._model_dir, "image_classifier.pth")
 
-        # Try to load pre-trained model
-        if os.path.exists(self._model_path):
-            self._load_model()
-        else:
-            logger.info(
-                "No pre-trained image classifier found. Using heuristic classifier. "
-                "Run the training script to create a real model: python -m app.ml.train_image_classifier"
-            )
+        self._load_model()
 
     def _load_model(self):
-        """Load a pre-trained EfficientNet-B0 model."""
+        """Load the CLIP zero-shot model."""
         try:
-            import torch
-            import torchvision.models as models
-            import torchvision.transforms as transforms
-
-            # Build model architecture
-            self.model = models.efficientnet_b0(weights=None)
-            # Replace classifier head for our classes
-            num_features = self.model.classifier[1].in_features
-            self.model.classifier[1] = torch.nn.Linear(num_features, len(DAMAGE_TYPES))
-
-            # Load weights
-            state_dict = torch.load(self._model_path, map_location="cpu", weights_only=True)
-            self.model.load_state_dict(state_dict)
-            self.model.eval()
-
-            # Define transforms (same as training)
-            self.transform = transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ])
-
+            from transformers import CLIPProcessor, CLIPModel
+            
+            model_id = "openai/clip-vit-base-patch32"
+            self.processor = CLIPProcessor.from_pretrained(model_id)
+            self.model = CLIPModel.from_pretrained(model_id)
+            
             self.is_loaded = True
-            logger.info("Image classifier model loaded successfully")
+            logger.info("CLIP zero-shot image classifier loaded successfully")
 
         except ImportError:
-            logger.warning("torch/torchvision not installed. Using heuristic classifier.")
+            logger.warning("transformers not installed. Using heuristic classifier.")
         except Exception as e:
             logger.error(f"Failed to load image classifier: {e}")
 
@@ -95,18 +70,27 @@ class ImageSeverityClassifier:
             return self._classify_heuristic(image_bytes)
 
     def _classify_with_model(self, image_bytes: bytes) -> Dict:
-        """Run inference through the trained EfficientNet model."""
+        """Run inference through the CLIP zero-shot model."""
         import torch
         from PIL import Image
 
-        # Load and preprocess image
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        input_tensor = self.transform(image).unsqueeze(0)
+        
+        prompts = [
+            "a photo of a landslide or mud and rock debris blocking a road",
+            "a photo of a road washed out and collapsed",
+            "a photo of deep cracks and potholes in road asphalt",
+            "a photo of a flooded road submerged under water",
+            "a photo of a damaged or broken bridge",
+            "a photo of a clean, normal open paved road"
+        ]
 
         # Inference
+        inputs = self.processor(text=prompts, images=image, return_tensors="pt", padding=True)
         with torch.no_grad():
-            outputs = self.model(input_tensor)
-            probabilities = torch.softmax(outputs, dim=1)[0]
+            outputs = self.model(**inputs)
+            logits_per_image = outputs.logits_per_image
+            probabilities = logits_per_image.softmax(dim=1)[0]
 
         # Get top prediction
         top_idx = probabilities.argmax().item()
@@ -125,7 +109,7 @@ class ImageSeverityClassifier:
                 for i in range(len(DAMAGE_TYPES))
             },
             "description": self._generate_description(damage_type, severity, confidence),
-            "model": "efficientnet_b0",
+            "model": "clip-vit-base-patch32",
         }
 
     def _classify_heuristic(self, image_bytes: bytes) -> Dict:
