@@ -102,7 +102,7 @@ A governance intelligence layer providing:
 | **D3.js** / **Recharts** | Data visualization, charts, and analytics dashboards |
 | **React Native**  | Cross-platform mobile app (Android & iOS) for field reporting |
 | **PWA (Service Workers)** | Offline-first capability for web dashboard |
-
++
 ### Backend
 | Technology        | Purpose                                          |
 | ----------------- | ------------------------------------------------ |

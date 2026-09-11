@@ -1,26 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Color Palette - Premium Green/Black */
-  --bg-main: #050505;
-  --bg-panel: #121212;
-  --bg-panel-hover: #1a1a1a;
+  /* Color Palette - Dark Theme (Default) */
+  --bg-main: #0a0f0d;
+  --bg-panel: #141c18;
+  --bg-panel-hover: #1b2621;
   
-  --accent-primary: #00FF66; /* Vibrant neon green for active elements */
-  --accent-secondary: #10B981; /* Calmer emerald green */
-  --accent-glow: rgba(0, 255, 102, 0.2);
+  --accent-primary: #4ade80; /* Soft light green */
+  --accent-secondary: #27d567; /* Deeper green */
+  --accent-glow: rgba(74, 222, 128, 0.2);
 
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0A0A0;
-  --text-muted: #666666;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
   /* Semantic Colors */
-  --risk-low: #10B981;
-  --risk-medium: #F59E0B;
-  --risk-high: #EF4444;
+  --risk-low: #22c55e;
+  --risk-medium: #f59e0b;
+  --risk-high: #ef4444;
 
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(0, 255, 102, 0.5);
+  --border-active: rgba(74, 222, 128, 0.5);
 
   /* Typography */
   --font-body: 'Inter', sans-serif;
@@ -28,12 +28,32 @@
 
   /* Effects */
   --panel-radius: 12px;
-  --glass-bg: rgba(18, 18, 18, 0.7);
+  --glass-bg: rgba(20, 28, 24, 0.7);
   --glass-blur: blur(12px);
   
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
+}
+
+[data-theme='light'] {
+  /* Color Palette - Light Theme */
+  --bg-main: #f0fdf4; /* Very light green tinted background */
+  --bg-panel: #ffffff;
+  --bg-panel-hover: #e8f5e9;
+  
+  --accent-primary: #16a34a; /* Darker green for contrast in light mode */
+  --accent-secondary: #15803d;
+  --accent-glow: rgba(22, 163, 74, 0.2);
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-active: rgba(22, 163, 74, 0.5);
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
 }
 
 * {

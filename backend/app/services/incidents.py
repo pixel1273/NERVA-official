@@ -35,22 +35,27 @@ async def create_incident_with_ai(data: IncidentCreate) -> dict:
     ai_result = None
 
     try:
-        from ..ml.text_classifier import text_classifier
+        from .ai_router import analyze_incident
 
         if data.description:
-            classification = text_classifier.classify(data.description, data.type)
-            ai_severity = classification["severity"]
-            ai_confidence = classification["confidence"]
+            ai_severity = await analyze_incident(data.description)
+            ai_severity = ai_severity.lower().strip()
 
-            # Override severity if AI is confident and severity wasn't explicitly set to critical
-            if ai_confidence > 0.5 and data.severity == "medium":
-                logger.info(
-                    f"AI overriding severity: '{data.severity}' → '{ai_severity}' "
-                    f"(confidence: {ai_confidence:.2f})"
-                )
-                data.severity = ai_severity
+            valid_severities = {"low", "medium", "high", "critical"}
+            if ai_severity in valid_severities:
+                # Override severity if AI suggests it, unless it's already critical
+                if data.severity != "critical" and data.severity != ai_severity:
+                    logger.info(f"AI overriding severity: '{data.severity}' → '{ai_severity}'")
+                    data.severity = ai_severity
 
-            ai_result = classification
+                ai_result = {
+                    "severity": ai_severity,
+                    "confidence": 0.9,
+                    "model": "ai_router",
+                    "reasoning": f"AI Router classified this as '{ai_severity}'."
+                }
+            else:
+                logger.warning(f"AI returned invalid severity: {ai_severity}")
     except Exception as e:
         logger.warning(f"AI classification failed, using manual severity: {e}")
 

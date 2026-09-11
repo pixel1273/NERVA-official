@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './NERMap.css';
 
 // NER node coordinates (lat, lng) for road network visualization — all 8 NE states
@@ -83,10 +83,28 @@ function getRiskLabel(segment) {
   return 'Low Risk';
 }
 
-export function NERMap({ segments = [], incidents = [], fleet = [], height = '500px', showFleet = false, showIncidents = true }) {
+export function NERMap({ 
+  segments = [], 
+  incidents = [], 
+  fleet = [], 
+  height = '500px', 
+  showFleet = false, 
+  showIncidents = true,
+  showHeatmap = false,
+  enableClustering = false,
+  showStateBoundaries = true,
+  onSegmentClick = null,
+  onIncidentClick = null,
+  onStateClick = null
+}) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const layersRef = useRef([]);
+  const heatmapLayerRef = useRef(null);
+  const markerClusterGroupRef = useRef(null);
+  const boundaryLayerRef = useRef(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [geoJsonData, setGeoJsonData] = useState(null);
 
   useEffect(() => {
     let L;
@@ -114,14 +132,40 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
         maxZoom: 18,
       }).setView([25.5, 92.5], 7);
 
-      // Free CartoDB Dark Matter No Labels — no API key needed
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
-        subdomains: 'abcd',
-        maxZoom: 18,
-      }).addTo(map);
+      const useBhuvan = import.meta.env.VITE_USE_BHUVAN !== 'false'; // Default to true
+      const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+      
+      if (useBhuvan) {
+        // ISRO Bhuvan WMS Tile Layer (Perfect for SIH)
+        L.tileLayer.wms('https://bhuvan-vec1.nrsc.gov.in/bhuvan/gwc/service/wms/', {
+          layers: 'india3', // Bhuvan base map layer
+          format: 'image/jpeg',
+          transparent: false,
+          version: '1.1.1',
+          attribution: 'Map data © <a href="https://bhuvan.nrsc.gov.in/">ISRO Bhuvan</a>',
+          maxZoom: 18,
+        }).addTo(map);
+      } else if (mapboxToken) {
+        // High-quality Mapbox Satellite Streets
+        L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxToken}`, {
+          attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 18,
+        }).addTo(map);
+      } else {
+        // Free CartoDB Dark Matter No Labels — fallback
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+          attribution: '© OpenStreetMap contributors © CARTO',
+          subdomains: 'abcd',
+          maxZoom: 18,
+        }).addTo(map);
+      }
 
       mapInstanceRef.current = map;
+      setMapLoaded(true);
+      
+      // Load GeoJSON data
+      loadGeoJsonBoundaries();
+      
       updateLayers(L, map);
     };
 
@@ -139,17 +183,110 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
   useEffect(() => {
     const updateAsync = async () => {
       const L = await import('leaflet');
-      if (mapInstanceRef.current) {
+      if (mapInstanceRef.current && mapLoaded) {
         updateLayers(L, mapInstanceRef.current);
       }
     };
     updateAsync();
-  }, [segments, incidents, fleet, showFleet, showIncidents]);
+  }, [segments, incidents, fleet, showFleet, showIncidents, showHeatmap, enableClustering, showStateBoundaries, geoJsonData, mapLoaded]);
+
+  // Load GeoJSON boundaries
+  const loadGeoJsonBoundaries = async () => {
+    try {
+      const response = await fetch('/geojson/northeast-india-states.geojson');
+      const data = await response.json();
+      setGeoJsonData(data);
+    } catch (err) {
+      console.warn('Could not load GeoJSON boundaries:', err);
+    }
+  };
+
+  // Render state boundaries
+  const renderStateBoundaries = (L, map) => {
+    if (!showStateBoundaries || !geoJsonData) return;
+    
+    // Remove existing boundary layer
+    if (boundaryLayerRef.current) {
+      map.removeLayer(boundaryLayerRef.current);
+    }
+
+    // Style function for state boundaries
+    const stateStyle = (feature) => ({
+      fillColor: 'rgba(0, 212, 255, 0.05)',
+      weight: 2,
+      opacity: 0.6,
+      color: 'rgba(0, 212, 255, 0.4)',
+      fillOpacity: 0.1,
+    });
+
+    // Hover style
+    const highlightStyle = {
+      weight: 3,
+      opacity: 1,
+      color: '#00D4FF',
+      fillOpacity: 0.2,
+    };
+
+    // Create GeoJSON layer
+    const geoJsonLayer = L.geoJSON(geoJsonData, {
+      style: stateStyle,
+      onEachFeature: (feature, layer) => {
+        const props = feature.properties;
+        
+        // Hover effects
+        layer.on({
+          mouseover: (e) => {
+            const layer = e.target;
+            layer.setStyle(highlightStyle);
+            layer.bringToFront();
+          },
+          mouseout: (e) => {
+            geoJsonLayer.resetStyle(e.target);
+          },
+          click: (e) => {
+            if (onStateClick) {
+              onStateClick(props);
+            }
+            // Show popup with state info
+            const popup = L.popup()
+              .setLatLng(e.latlng)
+              .setContent(`
+                <div style="font-family: Inter, sans-serif; min-width: 180px;">
+                  <div style="font-weight: 600; font-size: 16px; margin-bottom: 8px; color: #00D4FF;">
+                    ${props.name}
+                  </div>
+                  <table style="font-size: 12px; width: 100%; border-collapse: collapse;">
+                    <tr><td style="padding: 3px 0; color: #888;">Capital</td><td style="text-align: right; font-weight: 500;">${props.capital}</td></tr>
+                    <tr><td style="padding: 3px 0; color: #888;">Population</td><td style="text-align: right; font-weight: 500;">${(props.population / 1000000).toFixed(2)}M</td></tr>
+                    <tr><td style="padding: 3px 0; color: #888;">Area</td><td style="text-align: right; font-weight: 500;">${props.area_km2.toLocaleString()} km²</td></tr>
+                    <tr><td style="padding: 3px 0; color: #888;">Code</td><td style="text-align: right; font-weight: 600; color: #00D4FF;">${props.state_code}</td></tr>
+                  </table>
+                </div>
+              `)
+              .openOn(map);
+          }
+        });
+
+        // Add state name tooltip
+        layer.bindTooltip(props.name, {
+          permanent: false,
+          direction: 'center',
+          className: 'state-boundary-tooltip'
+        });
+      }
+    }).addTo(map);
+
+    boundaryLayerRef.current = geoJsonLayer;
+    layersRef.current.push(geoJsonLayer);
+  };
 
   function updateLayers(L, map) {
     // Clear old layers
     layersRef.current.forEach(layer => map.removeLayer(layer));
     layersRef.current = [];
+
+    // --- Draw State Boundaries First (as base layer) ---
+    renderStateBoundaries(L, map);
 
     // --- Draw Road Segments ---
     segments.forEach(seg => {
@@ -166,7 +303,22 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
         weight,
         opacity: 0.85,
         dashArray,
+        className: seg.is_blocked ? 'blocked-road-segment' : '',
       }).addTo(map);
+
+      // Add click handler if provided
+      if (onSegmentClick) {
+        line.on('click', () => onSegmentClick(seg));
+      }
+
+      // Animate blocked segments
+      if (seg.is_blocked) {
+        let offset = 0;
+        setInterval(() => {
+          offset = (offset + 1) % 20;
+          line.setStyle({ dashOffset: -offset });
+        }, 100);
+      }
 
       line.bindPopup(`
         <div style="font-family: Inter, sans-serif; min-width: 180px;">
@@ -233,18 +385,38 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
         
         const icon = L.divIcon({
           className: 'incident-marker',
-          html: `<div style="
-            width: 24px; height: 24px; border-radius: 50%;
-            background: ${color}; border: 2px solid #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: #fff; font-weight: bold;
-            box-shadow: 0 0 8px ${color}80;
-          ">⚠</div>`,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
+          html: `<div class="incident-marker-wrapper ${inc.severity}" style="
+            position: relative;
+          ">
+            <div class="incident-pulse" style="
+              position: absolute;
+              width: 40px; height: 40px;
+              border-radius: 50%;
+              background: ${color}40;
+              top: 50%; left: 50%;
+              transform: translate(-50%, -50%);
+              animation: pulse-wave 2s ease-out infinite;
+            "></div>
+            <div style="
+              position: relative;
+              width: 24px; height: 24px; border-radius: 50%;
+              background: ${color}; border: 2px solid #fff;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 12px; color: #fff; font-weight: bold;
+              box-shadow: 0 0 15px ${color}80;
+              z-index: 10;
+            ">⚠</div>
+          </div>`,
+          iconSize: [40, 40],
+          iconAnchor: [20, 20],
         });
 
         const marker = L.marker([inc.latitude, inc.longitude], { icon }).addTo(map);
+
+        // Add click handler if provided
+        if (onIncidentClick) {
+          marker.on('click', () => onIncidentClick(inc));
+        }
 
         marker.bindPopup(`
           <div style="font-family: Inter, sans-serif; min-width: 200px;">
@@ -272,14 +444,28 @@ export function NERMap({ segments = [], incidents = [], fleet = [], height = '50
 
         const icon = L.divIcon({
           className: 'fleet-marker',
-          html: `<div style="
-            width: 28px; height: 28px; border-radius: 6px;
-            background: ${statusColor}; border: 2px solid #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; color: #000; font-weight: bold;
-            box-shadow: 0 0 10px ${statusColor}60;
-            transform: rotate(-20deg);
-          ">🚛</div>`,
+          html: `<div class="fleet-marker-wrapper" style="
+            position: relative;
+          ">
+            <div class="fleet-trail" style="
+              position: absolute;
+              width: 50px; height: 4px;
+              background: linear-gradient(90deg, transparent, ${statusColor}60, transparent);
+              top: 50%; left: -25px;
+              transform: translateY(-50%);
+              animation: trail-move 1.5s ease-in-out infinite;
+            "></div>
+            <div style="
+              position: relative;
+              width: 28px; height: 28px; border-radius: 6px;
+              background: ${statusColor}; border: 2px solid #fff;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 14px; color: #000; font-weight: bold;
+              box-shadow: 0 0 15px ${statusColor}80;
+              transform: rotate(-20deg);
+              z-index: 10;
+            ">🚛</div>
+          </div>`,
           iconSize: [28, 28],
           iconAnchor: [14, 14],
         });

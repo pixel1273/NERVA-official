@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Activity, Map, Route, AlertTriangle, Truck, Building2, Settings, FilePlus, BarChart3, Download, X } from 'lucide-react';
+import { Activity, Map, Route, AlertTriangle, Truck, Building2, Settings, FilePlus, BarChart3, Download, X, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './Sidebar.css';
 
 const navItems = [
   { path: '/', icon: Activity, label: 'Overview', roles: ['role_ground_staff', 'role_district_admin', 'role_central_command'] },
+  { path: '/gis', icon: Map, label: 'GIS Intelligence', roles: ['role_district_admin', 'role_central_command'] },
   { path: '/report', icon: FilePlus, label: 'New Report', roles: ['role_ground_staff', 'role_district_admin', 'role_central_command'] },
   { path: '/incidents', icon: AlertTriangle, label: 'Field Reports', roles: ['role_ground_staff', 'role_district_admin', 'role_central_command'] },
   { path: '/omniroute', icon: Route, label: 'OmniRoute', roles: ['role_district_admin', 'role_central_command'] },
@@ -18,6 +19,22 @@ const navItems = [
 export function Sidebar({ isOpen, onClose }) {
   const { user } = useAuth();
   const userRole = user?.role;
+
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') !== 'light';
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(prev => !prev);
 
   const filteredNavItems = navItems.filter(item =>
     !item.roles || item.roles.includes(userRole)
@@ -48,6 +65,15 @@ export function Sidebar({ isOpen, onClose }) {
       </nav>
 
       <div className="sidebar-footer">
+        <button 
+          onClick={toggleTheme} 
+          className="theme-toggle-btn" 
+          aria-label="Toggle theme"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', padding: '0.5rem', width: '100%', borderRadius: '8px', cursor: 'pointer', border: '1px solid var(--border-color)', background: 'var(--bg-panel-hover)', color: 'var(--text-primary)' }}
+        >
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
         <div className="sidebar-version">
           <span className="version-dot"></span>
           v1.0.0 — SIH 2026

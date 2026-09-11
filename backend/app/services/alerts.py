@@ -31,21 +31,28 @@ async def create_alert_with_translation(data: AlertCreate) -> AlertResponse:
     If only message_en is provided, auto-translates to Assamese, Hindi, and Manipuri.
     """
     try:
-        from ..ml.translator import translator
+        from .ai_router import translate_alert
+        import asyncio
 
         # Only translate if regional languages are missing
         if data.message_en and not data.message_as:
-            translations = await translator.translate_all(
-                data.message_en, target_langs=["as", "hi", "mn"]
-            )
-            if not data.message_as:
-                data.message_as = translations.get("as")
-            if not data.message_hi:
-                data.message_hi = translations.get("hi")
-            if not data.message_mn:
-                data.message_mn = translations.get("mn")
+            async def get_trans(lang_name):
+                return await translate_alert(data.message_en, lang_name)
 
-            logger.info(f"Auto-translated alert to {len(translations)-1} languages")
+            translations = await asyncio.gather(
+                get_trans("Assamese"),
+                get_trans("Hindi"),
+                get_trans("Manipuri (Meitei)")
+            )
+
+            if not data.message_as:
+                data.message_as = translations[0]
+            if not data.message_hi:
+                data.message_hi = translations[1]
+            if not data.message_mn:
+                data.message_mn = translations[2]
+
+            logger.info("Auto-translated alert to 3 languages via ai_router")
     except Exception as e:
         logger.warning(f"Auto-translation failed, creating alert with English only: {e}")
 

@@ -39,7 +39,10 @@
 #     """
 #     Extract severity from this report using the AI router.
 #     """
-#     messages = [{"role": "user", "content": f"Extract severity from this report: {incident_text}"}]
+#     messages = [
+#         {"role": "system", "content": "You are a crisis severity analyst. Extract the severity level from the incident report. Respond with ONLY one word: low, medium, high, or critical. Do not include any other text or punctuation."},
+#         {"role": "user", "content": f"Extract severity from this report: {incident_text}"}
+#     ]
     
 #     # The router will try GPT-4o first. If it fails, it routes to Gemini 1.5 Pro.
 #     response = await ai_router.acompletion(

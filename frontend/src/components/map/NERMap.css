@@ -152,3 +152,179 @@
 .ner-map .leaflet-control-attribution a {
   color: #888 !important;
 }
+
+/* Advanced Animations for Enhanced Map Experience */
+
+/* Pulsing incident markers */
+@keyframes pulse-wave {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+.incident-marker-wrapper.critical .incident-pulse {
+  animation-duration: 1.5s !important;
+}
+
+/* Fleet vehicle trail animation */
+@keyframes trail-move {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px);
+  }
+}
+
+/* Blocked road segment animation */
+.blocked-road-segment {
+  animation: dash-flow 0.5s linear infinite;
+}
+
+@keyframes dash-flow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -20;
+  }
+}
+
+/* Enhanced node markers with glow effect */
+.leaflet-marker-icon.node-marker {
+  animation: node-glow 2s ease-in-out infinite;
+}
+
+@keyframes node-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px #00FF66);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #00FF66);
+  }
+}
+
+/* Critical severity pulsing */
+.incident-marker-wrapper.critical {
+  animation: critical-shake 0.5s ease-in-out infinite;
+}
+
+@keyframes critical-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+/* Real-time data update indicator on markers */
+.marker-update-flash {
+  animation: flash-update 0.3s ease-out;
+}
+
+@keyframes flash-update {
+  0% {
+    filter: brightness(2);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+/* Smooth zoom transitions */
+.ner-map .leaflet-zoom-animated {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Enhanced polyline hover effect */
+.ner-map path.leaflet-interactive:hover {
+  stroke-width: 6 !important;
+  filter: drop-shadow(0 0 8px currentColor);
+  cursor: pointer;
+}
+
+/* Marker cluster custom styling */
+.marker-cluster {
+  background: rgba(0, 255, 102, 0.2) !important;
+  border: 2px solid rgba(0, 255, 102, 0.6) !important;
+}
+
+.marker-cluster div {
+  background: rgba(0, 255, 102, 0.6) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+/* Loading skeleton for map tiles */
+.ner-map.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  animation: skeleton-load 1.5s ease-in-out infinite;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+@keyframes skeleton-load {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+
+/* State Boundary Styling */
+.state-boundary-tooltip {
+  background: rgba(0, 212, 255, 0.9) !important;
+  color: #000 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4) !important;
+  letter-spacing: 0.5px !important;
+}
+
+.state-boundary-tooltip::before {
+  display: none !important;
+}
+
+/* State boundary hover animation */
+.leaflet-interactive[style*="fill"] {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.leaflet-interactive[style*="fill"]:hover {
+  cursor: pointer !important;
+  filter: brightness(1.3) !important;
+}
+
+/* GeoJSON popup styling enhancement */
+.leaflet-popup-content-wrapper {
+  background: rgba(20, 20, 30, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
