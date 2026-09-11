@@ -89,10 +89,10 @@ def reroute_fleet(blocked_u: str, blocked_v: str) -> dict:
 
 def get_fleet_stats() -> dict:
     conn = get_connection()
-    total = conn.execute("SELECT COUNT(*) FROM fleet").fetchone()[0]
-    in_transit = conn.execute("SELECT COUNT(*) FROM fleet WHERE status = 'in_transit'").fetchone()[0]
-    delayed = conn.execute("SELECT COUNT(*) FROM fleet WHERE status = 'delayed'").fetchone()[0]
-    blocked = conn.execute("SELECT COUNT(*) FROM fleet WHERE status = 'blocked'").fetchone()[0]
+    total = conn.execute("SELECT COUNT(*) as cnt FROM fleet").fetchone()["cnt"]
+    in_transit = conn.execute("SELECT COUNT(*) as cnt FROM fleet WHERE status = 'in_transit'").fetchone()["cnt"]
+    delayed = conn.execute("SELECT COUNT(*) as cnt FROM fleet WHERE status = 'delayed'").fetchone()["cnt"]
+    blocked = conn.execute("SELECT COUNT(*) as cnt FROM fleet WHERE status = 'blocked'").fetchone()["cnt"]
     conn.close()
     return {"total_vehicles": total, "in_transit": in_transit, "delayed": delayed, "blocked": blocked}
 

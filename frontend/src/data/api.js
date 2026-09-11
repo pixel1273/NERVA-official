@@ -5,7 +5,7 @@
 const API_BASE = `http://${window.location.hostname}:8000`;
 
 function getToken() {
-  return localStorage.getItem('nerva_token');
+  return localStorage.getItem('nerva-token');
 }
 
 async function request(path, options = {}) {

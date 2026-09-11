@@ -118,7 +118,7 @@ def update_incident(incident_id: int, data: IncidentUpdate) -> Optional[Incident
         conn.close()
         return get_incident(incident_id)
 
-    updates.append("updated_at = datetime('now')")
+    updates.append("updated_at = CURRENT_TIMESTAMP")
     params.append(incident_id)
 
     conn.execute(f"UPDATE incidents SET {', '.join(updates)} WHERE id = %s", params)
@@ -131,10 +131,10 @@ def update_incident(incident_id: int, data: IncidentUpdate) -> Optional[Incident
 def get_stats() -> dict:
     """Aggregate stats for the overview dashboard."""
     conn = get_connection()
-    total = conn.execute("SELECT COUNT(*) FROM incidents").fetchone()[0]
-    critical = conn.execute("SELECT COUNT(*) FROM incidents WHERE severity = 'critical' AND status != 'resolved'").fetchone()[0]
-    high = conn.execute("SELECT COUNT(*) FROM incidents WHERE severity = 'high' AND status != 'resolved'").fetchone()[0]
-    resolved = conn.execute("SELECT COUNT(*) FROM incidents WHERE status = 'resolved'").fetchone()[0]
+    total = conn.execute("SELECT COUNT(*) as cnt FROM incidents").fetchone()["cnt"]
+    critical = conn.execute("SELECT COUNT(*) as cnt FROM incidents WHERE severity = 'critical' AND status != 'resolved'").fetchone()["cnt"]
+    high = conn.execute("SELECT COUNT(*) as cnt FROM incidents WHERE severity = 'high' AND status != 'resolved'").fetchone()["cnt"]
+    resolved = conn.execute("SELECT COUNT(*) as cnt FROM incidents WHERE status = 'resolved'").fetchone()["cnt"]
     active = total - resolved
 
     by_state = {}

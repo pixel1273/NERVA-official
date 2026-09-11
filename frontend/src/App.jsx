@@ -26,12 +26,12 @@ function App() {
           
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
-            <Route path="incidents" element={<Incidents />} />
-            <Route path="report" element={<ReportIncident />} />
-            <Route path="omniroute" element={<OmniRoutePage />} />
-            <Route path="fleet" element={<FleetPage />} />
-            <Route path="district" element={<DistrictPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="incidents" element={<ProtectedRoute allowedRoles={['public', 'driver', 'command']}><Incidents /></ProtectedRoute>} />
+            <Route path="report" element={<ProtectedRoute allowedRoles={['public', 'driver', 'command']}><ReportIncident /></ProtectedRoute>} />
+            <Route path="omniroute" element={<ProtectedRoute allowedRoles={['driver', 'command']}><OmniRoutePage /></ProtectedRoute>} />
+            <Route path="fleet" element={<ProtectedRoute allowedRoles={['command']}><FleetPage /></ProtectedRoute>} />
+            <Route path="district" element={<ProtectedRoute allowedRoles={['command']}><DistrictPage /></ProtectedRoute>} />
+            <Route path="analytics" element={<ProtectedRoute allowedRoles={['command']}><AnalyticsPage /></ProtectedRoute>} />
             <Route path="install" element={<InstallPage />} />
             <Route path="*" element={<div style={{padding: '2rem', color: 'var(--text-secondary)'}}>Page under construction...</div>} />
           </Route>
