@@ -28,10 +28,12 @@ class APIKeyManager:
         self.cooldown_seconds = cooldown_seconds
         self._gemini_keys: List[str] = []
         self._openai_keys: List[str] = []
+        self._deepseek_keys: List[str] = []
         # Tracks failed keys: { key_hash: timestamp_of_failure }
         self._failed_keys: dict = {}
         self._current_gemini_index = 0
         self._current_openai_index = 0
+        self._current_deepseek_index = 0
 
         self._load_keys()
 
@@ -56,8 +58,18 @@ class APIKeyManager:
         if single_openai and single_openai not in self._openai_keys:
             self._openai_keys.insert(0, single_openai)
 
+        # Load Deepseek keys (comma-separated)
+        deepseek_keys_str = os.getenv("DEEPSEEK_API_KEYS", "")
+        if deepseek_keys_str:
+            self._deepseek_keys = [k.strip() for k in deepseek_keys_str.split(",") if k.strip()]
+            
+        single_deepseek = os.getenv("DEEPSEEK_API_KEY", "")
+        if single_deepseek and single_deepseek not in self._deepseek_keys:
+            self._deepseek_keys.insert(0, single_deepseek)
+
         logger.info(
             f"API Key Manager loaded: {len(self._gemini_keys)} Gemini key(s), "
+            f"{len(self._deepseek_keys)} Deepseek key(s), "
             f"{len(self._openai_keys)} OpenAI key(s)"
         )
 
@@ -90,6 +102,10 @@ class APIKeyManager:
         """Get all OpenAI keys that are not currently in cooldown."""
         return [k for k in self._openai_keys if self._is_cooled_down(k)]
 
+    def get_available_deepseek_keys(self) -> List[str]:
+        """Get all Deepseek keys that are not currently in cooldown."""
+        return [k for k in self._deepseek_keys if self._is_cooled_down(k)]
+
     def get_next_key(self) -> Optional[Tuple[str, str, str]]:
         """
         Get the next available API key to try.
@@ -104,6 +120,13 @@ class APIKeyManager:
             key = available_gemini[self._current_gemini_index % len(available_gemini)]
             self._current_gemini_index = (self._current_gemini_index + 1) % len(available_gemini)
             return ("gemini", "gemini/gemini-2.0-flash", key)
+
+        # Try Deepseek keys next
+        available_deepseek = self.get_available_deepseek_keys()
+        if available_deepseek:
+            key = available_deepseek[self._current_deepseek_index % len(available_deepseek)]
+            self._current_deepseek_index = (self._current_deepseek_index + 1) % len(available_deepseek)
+            return ("deepseek", "deepseek/deepseek-chat", key)
 
         # Fallback to OpenAI
         available_openai = self.get_available_openai_keys()
@@ -128,6 +151,11 @@ class APIKeyManager:
         for key in self._gemini_keys:
             if self._is_cooled_down(key):
                 keys.append(("gemini", "gemini/gemini-2.0-flash", key))
+                
+        # All available Deepseek keys
+        for key in self._deepseek_keys:
+            if self._is_cooled_down(key):
+                keys.append(("deepseek", "deepseek/deepseek-chat", key))
 
         # All available OpenAI keys
         for key in self._openai_keys:
@@ -138,17 +166,19 @@ class APIKeyManager:
 
     @property
     def total_keys(self) -> int:
-        return len(self._gemini_keys) + len(self._openai_keys)
+        return len(self._gemini_keys) + len(self._openai_keys) + len(self._deepseek_keys)
 
     @property
     def available_keys_count(self) -> int:
-        return len(self.get_available_gemini_keys()) + len(self.get_available_openai_keys())
+        return len(self.get_available_gemini_keys()) + len(self.get_available_openai_keys()) + len(self.get_available_deepseek_keys())
 
     def status(self) -> dict:
         """Return a status summary (safe for logging/API responses)."""
         return {
             "gemini_keys_total": len(self._gemini_keys),
             "gemini_keys_available": len(self.get_available_gemini_keys()),
+            "deepseek_keys_total": len(self._deepseek_keys),
+            "deepseek_keys_available": len(self.get_available_deepseek_keys()),
             "openai_keys_total": len(self._openai_keys),
             "openai_keys_available": len(self.get_available_openai_keys()),
             "cooldown_seconds": self.cooldown_seconds,

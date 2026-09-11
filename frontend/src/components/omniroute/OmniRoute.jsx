@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Route, ArrowRight, AlertTriangle, Clock, Navigation } from 'lucide-react';
 import { calculateRoute, getAlternativeRoutes } from '../../data/api';
+import { useTranslation } from 'react-i18next';
 import './OmniRoute.css';
 
 const NER_NODES = [
@@ -16,6 +17,7 @@ export function OmniRoutePage() {
   const [result, setResult] = useState(null);
   const [alternatives, setAlternatives] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function handleCalculate() {
     setLoading(true);
@@ -44,22 +46,22 @@ export function OmniRoutePage() {
     <div className="omniroute-page">
       <header className="page-header">
         <div>
-          <h2 className="page-title">OmniRoute — Smart Route Optimizer</h2>
-          <p className="page-subtitle">AI-powered risk-aware routing across North Eastern Region</p>
+          <h2 className="page-title">{t('route.title')}</h2>
+          <p className="page-subtitle">{t('route.subtitle')}</p>
         </div>
       </header>
 
       <div className="route-controls glass-panel">
         <div className="control-row">
           <div className="control-group">
-            <label>Origin</label>
+            <label>{t('route.origin')}</label>
             <select value={origin} onChange={e => setOrigin(e.target.value)}>
               {NER_NODES.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
           <ArrowRight size={24} className="arrow-icon" />
           <div className="control-group">
-            <label>Destination</label>
+            <label>{t('route.destination')}</label>
             <select value={destination} onChange={e => setDestination(e.target.value)}>
               {NER_NODES.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
@@ -67,7 +69,7 @@ export function OmniRoutePage() {
         </div>
 
         <div className="slider-row">
-          <label>Risk Sensitivity</label>
+          <label>{t('route.risk_weighting')}</label>
           <div className="slider-container">
             <span className="slider-label">Shortest</span>
             <input type="range" min="0" max="1" step="0.1" value={riskWeight} onChange={e => setRiskWeight(parseFloat(e.target.value))} />
@@ -78,7 +80,7 @@ export function OmniRoutePage() {
 
         <button className="btn-primary calculate-btn" onClick={handleCalculate} disabled={loading}>
           <Navigation size={16} />
-          {loading ? 'Calculating...' : 'Calculate Route'}
+          {loading ? t('route.calculating') : t('route.find_route')}
         </button>
       </div>
 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AlertOctagon, TrendingUp, CloudRain, MapPin, Zap, BellRing, Loader2, X, Truck } from 'lucide-react';
 import { fetchDashboardStats, fetchIncidents, fetchSegments, fetchFleet, generateEarlyWarningAlerts } from '../../data/api';
 import { NERMap } from '../map/NERMap';
+import { TerrainMap } from '../map/TerrainMap';
+import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 import './Dashboard.css';
 
@@ -21,6 +23,8 @@ export function Dashboard() {
   const [scanning, setScanning] = useState(false);
   const [lastScan, setLastScan] = useState(null);
   const [showFullMap, setShowFullMap] = useState(false);
+  const [is3D, setIs3D] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadAll();
@@ -60,7 +64,7 @@ export function Dashboard() {
   }
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-primary)' }}>Initializing Command Center...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-primary)' }}>{t('dashboard.system_online')}...</div>;
   }
 
   return (
@@ -68,8 +72,8 @@ export function Dashboard() {
       <header className="dashboard-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <div>
-            <h2 className="page-title">Command Center Overview</h2>
-            <p className="page-subtitle">North Eastern Region (NER) Logistics & Intelligence</p>
+            <h2 className="page-title">{t('dashboard.title')}</h2>
+            <p className="page-subtitle">{t('dashboard.subtitle')}</p>
           </div>
           <button
             className="btn-primary"
@@ -78,12 +82,12 @@ export function Dashboard() {
             disabled={scanning}
           >
             {scanning ? <Loader2 className="spin" size={18} /> : <Zap size={18} />}
-            {scanning ? 'Scanning Region...' : 'Trigger Early Warning Scan'}
+            {scanning ? t('dashboard.scanning') : t('dashboard.trigger_scan')}
           </button>
         </div>
         <div className="status-badge">
           <span className="status-dot"></span>
-          System Online
+          {t('dashboard.system_online')}
         </div>
       </header>
 
@@ -91,79 +95,112 @@ export function Dashboard() {
         <div className="metric-card glass-panel">
           <div className="metric-header">
             <AlertOctagon size={24} color="var(--risk-high)" />
-            <h3>Active Disruptions</h3>
+            <h3>{t('dashboard.active_disruptions')}</h3>
           </div>
           <div className="metric-value text-glow" style={{ color: 'var(--risk-high)' }}>
             {stats?.incidents?.active_incidents || '0'}
           </div>
-          <p className="metric-trend">{stats?.incidents?.critical_count || 0} critical • {stats?.incidents?.high_count || 0} high</p>
+          <p className="metric-trend">{stats?.incidents?.critical_count || 0} {t('dashboard.critical')} • {stats?.incidents?.high_count || 0} {t('dashboard.high')}</p>
         </div>
 
         <div className="metric-card glass-panel">
           <div className="metric-header">
             <MapPin size={24} color="var(--accent-primary)" />
-            <h3>Road Network</h3>
+            <h3>{t('dashboard.road_network')}</h3>
           </div>
           <div className="metric-value text-glow">
             {stats?.routes?.operational_pct || '0'}%
           </div>
-          <p className="metric-trend">{stats?.routes?.blocked_segments || '0'} segments blocked</p>
+          <p className="metric-trend">{stats?.routes?.blocked_segments || '0'} {t('dashboard.segments_blocked')}</p>
         </div>
 
         <div className="metric-card glass-panel">
           <div className="metric-header">
             <Truck size={24} color="var(--accent-secondary)" />
-            <h3>Fleet Status</h3>
+            <h3>{t('dashboard.fleet_status')}</h3>
           </div>
           <div className="metric-value" style={{ color: 'var(--accent-secondary)' }}>
             {stats?.fleet?.total_vehicles || '0'}
           </div>
-          <p className="metric-trend">{stats?.fleet?.in_transit || 0} in transit • {stats?.fleet?.blocked || 0} blocked</p>
+          <p className="metric-trend">{stats?.fleet?.in_transit || 0} {t('dashboard.in_transit')} • {stats?.fleet?.blocked || 0} {t('dashboard.blocked')}</p>
         </div>
 
         <div className="metric-card glass-panel">
           <div className="metric-header">
             <CloudRain size={24} color="var(--risk-medium)" />
-            <h3>Active Alerts</h3>
+            <h3>{t('dashboard.active_alerts')}</h3>
           </div>
           <div className="metric-value" style={{ color: 'var(--risk-medium)' }}>
             {stats?.active_alerts || '0'}
           </div>
-          <p className="metric-trend">Multilingual alerts active</p>
+          <p className="metric-trend">{t('dashboard.multilingual_alerts')}</p>
         </div>
       </div>
 
       <div className="dashboard-content">
         <div className="panel map-preview glass-panel">
           <div className="panel-header">
-            <h3>Live Intelligence Map</h3>
-            <button className="btn-primary" onClick={() => setShowFullMap(!showFullMap)}>
-              {showFullMap ? 'Minimize' : 'Expand Map'}
-            </button>
+            <h3>{t('dashboard.live_map')}</h3>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                className="btn-primary" 
+                onClick={() => setIs3D(false)} 
+                style={{ 
+                  background: !is3D ? 'var(--accent-primary)' : 'var(--bg-panel-hover)',
+                  color: !is3D ? 'var(--bg-main)' : 'var(--text-primary)'
+                }}
+              >
+                📡 2D View
+              </button>
+              <button 
+                className="btn-primary" 
+                onClick={() => setIs3D(true)} 
+                style={{ 
+                  background: is3D ? 'var(--accent-secondary)' : 'var(--bg-panel-hover)',
+                  color: is3D ? 'var(--bg-main)' : 'var(--text-primary)'
+                }}
+              >
+                ⛰️ 3D View
+              </button>
+              <button className="btn-primary" onClick={() => setShowFullMap(!showFullMap)}>
+                {showFullMap ? t('dashboard.minimize') : t('dashboard.expand_map')}
+              </button>
+            </div>
           </div>
-          <NERMap
-            segments={segments}
-            incidents={incidents}
-            fleet={fleet}
-            showFleet={true}
-            showIncidents={true}
-            height={showFullMap ? '650px' : '400px'}
-          />
+          {is3D ? (
+            <TerrainMap
+              segments={segments}
+              incidents={incidents}
+              fleet={fleet}
+              showFleet={true}
+              showIncidents={true}
+              height={showFullMap ? '650px' : '400px'}
+            />
+          ) : (
+            <NERMap
+              segments={segments}
+              incidents={incidents}
+              fleet={fleet}
+              showFleet={true}
+              showIncidents={true}
+              height={showFullMap ? '650px' : '400px'}
+            />
+          )}
         </div>
 
         <div className="panel field-reports glass-panel">
           <div className="panel-header">
-            <h3>Latest Field Reports</h3>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{incidents.length} reports</span>
+            <h3>{t('dashboard.latest_reports')}</h3>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{incidents.length} {t('dashboard.reports')}</span>
           </div>
           <div className="status-legend" style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><div className="report-indicator" style={{ background: 'var(--risk-high)', width: '8px', height: '8px' }}></div> Critical</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><div className="report-indicator" style={{ background: 'var(--risk-medium)', width: '8px', height: '8px' }}></div> Warning</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><div className="report-indicator" style={{ background: 'var(--risk-low)', width: '8px', height: '8px' }}></div> Resolved</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><div className="report-indicator" style={{ background: 'var(--risk-high)', width: '8px', height: '8px' }}></div> {t('dashboard.severity_critical')}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><div className="report-indicator" style={{ background: 'var(--risk-medium)', width: '8px', height: '8px' }}></div> {t('dashboard.severity_warning')}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><div className="report-indicator" style={{ background: 'var(--risk-low)', width: '8px', height: '8px' }}></div> {t('dashboard.severity_resolved')}</span>
           </div>
           <div className="reports-list">
             {incidents.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>No field reports yet.</p>
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>{t('dashboard.no_reports')}</p>
             ) : (
               incidents.map(inc => (
                 <div key={inc.id} className="report-item">

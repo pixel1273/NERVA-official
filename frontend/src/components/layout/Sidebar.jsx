@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Activity, Map, Route, AlertTriangle, Truck, Building2, Settings, FilePlus, BarChart3, Download, X, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import './Sidebar.css';
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
 
 export function Sidebar({ isOpen, onClose }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const userRole = user?.role;
 
   const [isDark, setIsDark] = useState(() => {
@@ -36,9 +38,7 @@ export function Sidebar({ isOpen, onClose }) {
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
-  const filteredNavItems = navItems.filter(item =>
-    !item.roles || item.roles.includes(userRole)
-  );
+  const filteredNavItems = navItems;
 
   return (
     <aside className={`sidebar glass-panel ${isOpen ? 'sidebar-open' : ''}`}>
@@ -59,7 +59,7 @@ export function Sidebar({ isOpen, onClose }) {
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             <item.icon size={20} className="nav-icon" />
-            <span>{item.label}</span>
+            <span>{t(`nav.${item.label}`)}</span>
           </NavLink>
         ))}
       </nav>
@@ -72,7 +72,7 @@ export function Sidebar({ isOpen, onClose }) {
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', padding: '0.5rem', width: '100%', borderRadius: '8px', cursor: 'pointer', border: '1px solid var(--border-color)', background: 'var(--bg-panel-hover)', color: 'var(--text-primary)' }}
         >
           {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+          <span>{isDark ? t('theme.Light Mode') : t('theme.Dark Mode')}</span>
         </button>
         <div className="sidebar-version">
           <span className="version-dot"></span>

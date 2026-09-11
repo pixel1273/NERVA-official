@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './NERMap.css';
 
 // NER node coordinates (lat, lng) for road network visualization — all 8 NE states
-const NODE_COORDS = {
+export const NODE_COORDS = {
   // Sikkim
   Gangtok:       [27.3389, 88.6065],
   // West Bengal gateway
@@ -36,7 +36,7 @@ const NODE_COORDS = {
 };
 
 // State label coordinates
-const STATE_LABELS = {
+export const STATE_LABELS = {
   'Sikkim': [27.5330, 88.5122],
   'Assam': [26.2006, 92.9376],
   'Meghalaya': [25.4670, 91.3662],
@@ -54,20 +54,20 @@ const NE_BOUNDS = [
 ];
 
 // Severity colors
-const SEVERITY_COLORS = {
+export const SEVERITY_COLORS = {
   critical: '#EF4444',
   high: '#FF6B35',
   medium: '#F59E0B',
   low: '#10B981',
 };
 
-const STATUS_COLORS = {
+export const STATUS_COLORS = {
   in_transit: '#00FF66',
   delayed: '#F59E0B',
   blocked: '#EF4444',
 };
 
-function getRiskColor(segment) {
+export function getRiskColor(segment) {
   if (segment.is_blocked) return '#EF4444';
   const risk = segment.landslide_risk + segment.weather_hazard;
   if (risk > 1.0) return '#EF4444';
@@ -75,7 +75,7 @@ function getRiskColor(segment) {
   return '#10B981';
 }
 
-function getRiskLabel(segment) {
+export function getRiskLabel(segment) {
   if (segment.is_blocked) return 'BLOCKED';
   const risk = segment.landslide_risk + segment.weather_hazard;
   if (risk > 1.0) return 'High Risk';

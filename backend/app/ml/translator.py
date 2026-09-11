@@ -59,14 +59,14 @@ class NERVATranslator:
             logger.error(f"Failed to load IndicTrans2: {e}")
             raise
 
-    async def translate(self, text: str, target_lang: str, source_lang: str = "en") -> str:
+    async def translate(self, text: str, target_lang: str, source_lang: str = "auto") -> str:
         """
         Translate text to the target language.
 
         Args:
             text: Source text to translate
-            target_lang: Target language code (e.g., "as", "hi", "mn")
-            source_lang: Source language code (default: "en")
+            target_lang: Target language code or name (e.g., "as", "hi", "Spanish", "French")
+            source_lang: Source language code or name (default: "auto")
 
         Returns:
             Translated text string
@@ -75,19 +75,21 @@ class NERVATranslator:
             return text
 
         target_name = NER_LANGUAGES.get(target_lang, target_lang)
+        source_name = NER_LANGUAGES.get(source_lang, source_lang)
 
         if self.backend == "api":
-            return await self._translate_api(text, target_name)
+            return await self._translate_api(text, target_name, source_name)
         else:
             return self._translate_local(text, target_lang)
 
-    async def translate_all(self, text: str, target_langs: Optional[list] = None) -> Dict[str, str]:
+    async def translate_all(self, text: str, target_langs: Optional[list] = None, source_lang: str = "auto") -> Dict[str, str]:
         """
-        Translate text to all supported NER languages at once.
+        Translate text to all provided target languages at once.
 
         Args:
-            text: English text to translate
-            target_langs: List of language codes. Defaults to ["as", "hi", "mn", "mz", "na"]
+            text: Text to translate
+            target_langs: List of language codes or names. Defaults to ["as", "hi", "mn", "mz", "na"]
+            source_lang: Source language code or name (default: "auto")
 
         Returns:
             Dict mapping language code → translated text
@@ -95,19 +97,25 @@ class NERVATranslator:
         if target_langs is None:
             target_langs = ["as", "hi", "mn", "mz", "na"]
 
-        translations = {"en": text}
+        translations = {}
+        # Also include the original text
+        if source_lang != "auto":
+            translations[source_lang] = text
+        else:
+            translations["original"] = text
+            
         for lang in target_langs:
             try:
-                translations[lang] = await self.translate(text, lang)
+                translations[lang] = await self.translate(text, lang, source_lang)
             except Exception as e:
                 logger.warning(f"Translation to {lang} failed: {e}")
                 translations[lang] = None
 
         return translations
 
-    async def _translate_api(self, text: str, target_language_name: str) -> str:
+    async def _translate_api(self, text: str, target_language_name: str, source_language_name: str = "auto") -> str:
         """
-        Translate using LiteLLM (Gemini/GPT API) with automatic key rotation.
+        Translate using LiteLLM (Gemini/DeepSeek/OpenAI API) with automatic key rotation.
 
         Tries all available API keys in sequence. If one key fails (rate limit,
         expired, etc.), it's marked as failed and the next key is tried immediately.
@@ -122,16 +130,15 @@ class NERVATranslator:
         keys_to_try = key_manager.get_all_keys_to_try()
         if not keys_to_try:
             raise ValueError(
-                "No API keys available. Set GEMINI_API_KEYS (comma-separated) "
-                "or GEMINI_API_KEY in your .env file."
+                "No API keys available. Set GEMINI_API_KEYS, DEEPSEEK_API_KEYS, or OPENAI_API_KEYS in your .env file."
             )
 
         messages = [
             {
                 "role": "system",
                 "content": (
-                    f"You are a professional translator for disaster management communications in India's North Eastern Region. "
-                    f"Translate the following English text to {target_language_name}. "
+                    f"You are a professional translator for disaster management communications. "
+                    f"Translate the following text from {source_language_name} to {target_language_name}. "
                     f"Use simple, clear language suitable for emergency alerts. "
                     f"Return ONLY the translated text, nothing else."
                 ),

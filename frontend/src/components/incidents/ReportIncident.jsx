@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Camera, MapPin, Send, AlertTriangle, X, WifiOff } from 'lucide-react';
 import { createIncidentWithAI, classifyImage } from '../../data/api';
 import { saveToOfflineQueue } from '../../data/offlineQueue';
+import { useTranslation } from 'react-i18next';
 import './Incidents.css';
 
 const NER_STATES_DISTRICTS = {
@@ -32,6 +33,7 @@ export function ReportIncident() {
     district: '',
     state: '',
   });
+  const { t } = useTranslation();
 
   useEffect(() => {
     captureLocation();
@@ -127,18 +129,18 @@ export function ReportIncident() {
           {savedOffline ? (
             <>
               <div style={styles.successIcon}><WifiOff size={48} color="var(--risk-medium)" /></div>
-              <h2 style={{ color: 'var(--risk-medium)' }}>Saved Offline</h2>
-              <p>No internet connection. Your report has been saved locally and will sync automatically when you're back online.</p>
+              <h2 style={{ color: 'var(--risk-medium)' }}>{t('report.saved_offline')}</h2>
+              <p>{t('report.saved_offline_desc')}</p>
             </>
           ) : (
             <>
               <div style={styles.successIcon}>✅</div>
-              <h2>Report Submitted!</h2>
-              <p>Your report has been sent to the District Admin for review.</p>
+              <h2>{t('report.report_submitted')}</h2>
+              <p>{t('report.report_submitted_desc')}</p>
             </>
           )}
           <button className="btn-primary" onClick={() => { setSubmitted(false); setSavedOffline(false); }} style={styles.button}>
-            Submit Another Report
+            {t('report.submit_another')}
           </button>
         </div>
       </div>
@@ -151,8 +153,8 @@ export function ReportIncident() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <AlertTriangle color="var(--accent-primary)" size={32} />
           <div>
-            <h2 className="page-title">Field Report</h2>
-            <p className="page-subtitle">Submit a real-time road vulnerability report</p>
+            <h2 className="page-title">{t('report.title')}</h2>
+            <p className="page-subtitle">{t('report.subtitle')}</p>
           </div>
         </div>
       </header>
@@ -162,16 +164,16 @@ export function ReportIncident() {
         <div className="glass-panel" style={styles.section}>
           <div style={styles.sectionHeader}>
             <MapPin size={20} color="var(--accent-primary)" />
-            <h3>Location</h3>
+            <h3>{t('report.location')}</h3>
           </div>
           <div style={styles.locationInfo}>
             {location.lat ? (
               <p>📍 {location.name}: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}</p>
             ) : (
-              <p>Detecting location...</p>
+              <p>{t('report.detecting')}</p>
             )}
             <button type="button" className="btn-secondary" onClick={captureLocation} style={styles.smallBtn}>
-              Recapture GPS
+              {t('report.recapture')}
             </button>
           </div>
         </div>
@@ -180,7 +182,7 @@ export function ReportIncident() {
         <div className="glass-panel" style={styles.section}>
           <div style={styles.sectionHeader}>
             <Camera size={20} color="var(--accent-primary)" />
-            <h3>Photo Evidence</h3>
+            <h3>{t('report.photo_evidence')}</h3>
           </div>
           <div style={styles.imageUploadArea}>
             {imagePreview ? (
@@ -203,7 +205,7 @@ export function ReportIncident() {
             ) : (
               <label style={styles.uploadLabel}>
                 <Camera size={48} color="var(--text-muted)" />
-                <span>Tap to capture photo</span>
+                <span>{t('report.tap_to_capture')}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -220,10 +222,10 @@ export function ReportIncident() {
         <div className="glass-panel" style={styles.section}>
           <div style={styles.sectionHeader}>
             <AlertTriangle size={20} color="var(--accent-primary)" />
-            <h3>Incident Details</h3>
+            <h3>{t('report.incident_details')}</h3>
           </div>
           <div style={styles.inputGroup}>
-            <label>Title</label>
+            <label>{t('report.form_title')}</label>
             <input
               type="text"
               placeholder="e.g., Landslide on NH-29"
@@ -234,7 +236,7 @@ export function ReportIncident() {
             />
           </div>
           <div style={styles.inputGroup}>
-            <label>Description</label>
+            <label>{t('report.form_desc')}</label>
             <textarea
               placeholder="Provide a brief description of the situation..."
               value={formData.description}
@@ -244,7 +246,7 @@ export function ReportIncident() {
           </div>
           <div style={styles.row}>
             <div style={styles.inputGroup}>
-              <label>Type</label>
+              <label>{t('report.type')}</label>
               <select
                 value={formData.type}
                 onChange={e => setFormData({...formData, type: e.target.value})}
@@ -258,7 +260,7 @@ export function ReportIncident() {
               </select>
             </div>
             <div style={styles.inputGroup}>
-              <label>Severity</label>
+              <label>{t('report.severity')}</label>
               <select
                 value={formData.severity}
                 onChange={e => setFormData({...formData, severity: e.target.value})}
@@ -273,19 +275,19 @@ export function ReportIncident() {
           </div>
           <div style={styles.row}>
             <div style={styles.inputGroup}>
-              <label>State</label>
+              <label>{t('report.state')}</label>
               <select
                 value={formData.state}
                 onChange={e => setFormData({...formData, state: e.target.value, district: ''})}
                 style={styles.input}
                 required
               >
-                <option value="">Select State</option>
+                <option value="">{t('report.select_state')}</option>
                 {Object.keys(NER_STATES_DISTRICTS).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div style={styles.inputGroup}>
-              <label>District</label>
+              <label>{t('report.district')}</label>
               <select
                 value={formData.district}
                 onChange={e => setFormData({...formData, district: e.target.value})}
@@ -293,7 +295,7 @@ export function ReportIncident() {
                 required
                 disabled={!formData.state}
               >
-                <option value="">Select District</option>
+                <option value="">{t('report.select_district')}</option>
                 {formData.state && NER_STATES_DISTRICTS[formData.state]?.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
@@ -301,9 +303,9 @@ export function ReportIncident() {
         </div>
 
         <button type="submit" className="btn-primary" style={styles.submitBtn} disabled={loading}>
-          {loading ? 'Sending Report...' : (
+          {loading ? t('report.sending') : (
             <>
-              Submit Report <Send size={20} />
+              {t('report.submit')} <Send size={20} />
             </>
           )}
         </button>

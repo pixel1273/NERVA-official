@@ -9,23 +9,29 @@ import { DistrictPage } from './components/district/District';
 import { AnalyticsPage } from './components/analytics/Analytics';
 import { InstallPage } from './components/install/InstallPage';
 import { Login } from './components/auth/Login';
+import { Register } from './components/auth/Register';
+import { ForgotPassword } from './components/auth/ForgotPassword';
+import { Unauthorized } from './components/auth/Unauthorized';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="incidents" element={<Incidents />} />
-            <Route path="report" element={<ProtectedRoute allowedRoles={['role_ground_staff', 'role_district_admin', 'role_central_command']}><ReportIncident /></ProtectedRoute>} />
+            <Route path="report" element={<ReportIncident />} />
             <Route path="omniroute" element={<OmniRoutePage />} />
-            <Route path="fleet" element={<ProtectedRoute allowedRoles={['role_central_command']}><FleetPage /></ProtectedRoute>} />
-            <Route path="district" element={<ProtectedRoute allowedRoles={['role_district_admin', 'role_central_command']}><DistrictPage /></ProtectedRoute>} />
-            <Route path="analytics" element={<ProtectedRoute allowedRoles={['role_district_admin', 'role_central_command']}><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="fleet" element={<FleetPage />} />
+            <Route path="district" element={<DistrictPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="install" element={<InstallPage />} />
             <Route path="*" element={<div style={{padding: '2rem', color: 'var(--text-secondary)'}}>Page under construction...</div>} />
           </Route>

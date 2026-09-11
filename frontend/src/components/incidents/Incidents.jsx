@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, AlertTriangle, Clock, Filter, ChevronDown } from 'lucide-react';
 import { fetchIncidents, updateIncident } from '../../data/api';
+import { useTranslation } from 'react-i18next';
 import './Incidents.css';
 
 const SEVERITY_COLORS = {
@@ -22,6 +23,7 @@ export function Incidents() {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ severity: '', status: '' });
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadIncidents();
@@ -53,32 +55,32 @@ export function Incidents() {
     <div className="incidents-page">
       <header className="page-header">
         <div>
-          <h2 className="page-title">Field Reports</h2>
-          <p className="page-subtitle">Live incident reports from Ground Staff across the NER</p>
+          <h2 className="page-title">{t('incidents.title')}</h2>
+          <p className="page-subtitle">{t('incidents.subtitle')}</p>
         </div>
         <div className="status-legend-bar">
-          <span><span className="dot" style={{ background: SEVERITY_COLORS.critical }}></span> Critical</span>
-          <span><span className="dot" style={{ background: SEVERITY_COLORS.high }}></span> High</span>
-          <span><span className="dot" style={{ background: SEVERITY_COLORS.medium }}></span> Warning</span>
-          <span><span className="dot" style={{ background: SEVERITY_COLORS.low }}></span> Resolved</span>
+          <span><span className="dot" style={{ background: SEVERITY_COLORS.critical }}></span> {t('dashboard.severity_critical')}</span>
+          <span><span className="dot" style={{ background: SEVERITY_COLORS.high }}></span> {t('dashboard.high')}</span>
+          <span><span className="dot" style={{ background: SEVERITY_COLORS.medium }}></span> {t('dashboard.severity_warning')}</span>
+          <span><span className="dot" style={{ background: SEVERITY_COLORS.low }}></span> {t('dashboard.severity_resolved')}</span>
         </div>
       </header>
 
       <div className="filter-bar glass-panel">
         <Filter size={16} />
         <select value={filter.severity} onChange={e => setFilter(f => ({...f, severity: e.target.value}))}>
-          <option value="">All Severities</option>
-          <option value="critical">Critical</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
+          <option value="">{t('incidents.all_severities')}</option>
+          <option value="critical">{t('dashboard.severity_critical')}</option>
+          <option value="high">{t('dashboard.high')}</option>
+          <option value="medium">{t('dashboard.severity_warning')}</option>
+          <option value="low">{t('dashboard.severity_resolved')}</option>
         </select>
         <select value={filter.status} onChange={e => setFilter(f => ({...f, status: e.target.value}))}>
-          <option value="">All Statuses</option>
-          <option value="reported">Reported</option>
-          <option value="acknowledged">Acknowledged</option>
-          <option value="in_progress">In Progress</option>
-          <option value="resolved">Resolved</option>
+          <option value="">{t('incidents.all_statuses')}</option>
+          <option value="reported">{t('incidents.reported')}</option>
+          <option value="acknowledged">{t('incidents.acknowledged')}</option>
+          <option value="in_progress">{t('incidents.in_progress')}</option>
+          <option value="resolved">{t('incidents.resolved')}</option>
         </select>
       </div>
 
@@ -89,7 +91,7 @@ export function Incidents() {
               <span className="severity-badge" style={{ background: SEVERITY_COLORS[inc.severity] }}>
                 {inc.severity.toUpperCase()}
               </span>
-              <span className="incident-type">{TYPE_LABELS[inc.type] || inc.type}</span>
+              <span className="incident-type">{t(`incidents.${inc.type}`) || TYPE_LABELS[inc.type] || inc.type}</span>
             </div>
             <h3 className="incident-title">{inc.title}</h3>
             <p className="incident-desc">{inc.description}</p>
@@ -99,17 +101,17 @@ export function Incidents() {
               <span><Clock size={14} /> {inc.created_at}</span>
             </div>
             <div className="incident-actions">
-              <span className={`status-tag status-${inc.status}`}>{inc.status.replace('_', ' ')}</span>
+              <span className={`status-tag status-${inc.status}`}>{t(`incidents.${inc.status}`)}</span>
               {inc.status !== 'resolved' && (
                 <select
                   className="status-select"
                   value={inc.status}
                   onChange={e => handleStatusChange(inc.id, e.target.value)}
                 >
-                  <option value="reported">Reported</option>
-                  <option value="acknowledged">Acknowledged</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
+                  <option value="reported">{t('incidents.reported')}</option>
+                  <option value="acknowledged">{t('incidents.acknowledged')}</option>
+                  <option value="in_progress">{t('incidents.in_progress')}</option>
+                  <option value="resolved">{t('incidents.resolved')}</option>
                 </select>
               )}
             </div>

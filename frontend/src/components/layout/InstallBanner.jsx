@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 /**
  * A dismissible install banner shown to ground staff users.
@@ -11,6 +12,7 @@ export function InstallBanner() {
   const { canInstall, triggerInstall } = useInstallPrompt();
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const wasDismissed = sessionStorage.getItem('nerva_install_dismissed');
@@ -30,13 +32,13 @@ export function InstallBanner() {
       <div style={styles.content}>
         <Download size={20} color="var(--accent-primary)" />
         <div style={styles.text}>
-          <strong>Install NERVA on your phone</strong>
-          <span style={styles.subtitle}>Works offline — report incidents without internet</span>
+          <strong>{t('install.title')}</strong>
+          <span style={styles.subtitle}>{t('install.subtitle')}</span>
         </div>
       </div>
       <div style={styles.actions}>
         <button onClick={triggerInstall} className="btn-primary" style={styles.installBtn}>
-          Install
+          {t('install.install_btn')}
         </button>
         <button onClick={handleDismiss} style={styles.dismissBtn} aria-label="Dismiss">
           <X size={18} />

@@ -25,11 +25,11 @@ def _get_cargo_priority(cargo_type: str) -> int:
 def update_position(vehicle_id: str, lat: float, lng: float) -> Optional[FleetVehicle]:
     conn = get_connection()
     conn.execute(
-        "UPDATE fleet SET current_lat = ?, current_lng = ?, last_updated = datetime('now') WHERE vehicle_id = ?",
+        "UPDATE fleet SET current_lat = %s, current_lng = %s, last_updated = CURRENT_TIMESTAMP WHERE vehicle_id = %s",
         (lat, lng, vehicle_id)
     )
     conn.commit()
-    row = conn.execute("SELECT * FROM fleet WHERE vehicle_id = ?", (vehicle_id,)).fetchone()
+    row = conn.execute("SELECT * FROM fleet WHERE vehicle_id = %s", (vehicle_id,)).fetchone()
     conn.close()
     return _row_to_vehicle(row) if row else None
 

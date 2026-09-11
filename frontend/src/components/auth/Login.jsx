@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ShieldAlert, User, Lock, ArrowRight, Activity } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -45,7 +47,13 @@ export const Login = () => {
       const userData = await meResponse.json();
 
       login(data.access_token, userData);
-      navigate('/');
+      
+      // Role-based routing
+      if (userData.user_type === 'driver') {
+        navigate('/driver');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,7 +73,7 @@ export const Login = () => {
             NERVA <span className="text-glow">COMMAND</span>
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            Secure Access — Ground & Central Operations
+            {t('auth.loginSubtitle')}
           </p>
         </div>
 
@@ -96,10 +104,16 @@ export const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleInputChange}
-              placeholder="Secure Password"
+              placeholder={t('auth.password')}
               style={styles.input}
               required
             />
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-0.5rem' }}>
+            <Link to="/forgot-password" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+              {t('auth.forgotPassword')}
+            </Link>
           </div>
 
           <button
@@ -110,18 +124,21 @@ export const Login = () => {
           >
             {loading ? (
               <span style={styles.buttonContent}>
-                <Activity size={18} className="spin" /> Authenticating...
+                <Activity size={18} className="spin" /> {t('auth.signingIn')}
               </span>
             ) : (
               <span style={styles.buttonContent}>
-                INITIALIZE SESSION <ArrowRight size={18} />
+                {t('auth.signIn')} <ArrowRight size={18} />
               </span>
             )}
           </button>
         </form>
 
         <div style={styles.footer}>
-          <p>UNAUTHORIZED ACCESS IS STRICTLY PROHIBITED.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+            {t('auth.noAccount')} <Link to="/register" style={{ color: 'var(--accent-primary)' }}>{t('auth.signUpLink')}</Link>
+          </p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--risk-high)', letterSpacing: '1px', opacity: 0.8 }}>UNAUTHORIZED ACCESS IS STRICTLY PROHIBITED.</p>
         </div>
       </div>
     </div>

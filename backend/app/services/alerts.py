@@ -15,12 +15,13 @@ def create_alert(data: AlertCreate) -> AlertResponse:
     cursor = conn.cursor()
     cursor.execute(
         """INSERT INTO alerts (title, message_en, message_as, message_hi, message_mn, severity, district, target_audience)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
         (data.title, data.message_en, data.message_as, data.message_hi, data.message_mn,
          data.severity, data.district, data.target_audience)
     )
+    new_id = cursor.fetchone()["id"]
     conn.commit()
-    row = cursor.execute("SELECT * FROM alerts WHERE id = ?", (cursor.lastrowid,)).fetchone()
+    row = cursor.execute("SELECT * FROM alerts WHERE id = %s", (new_id,)).fetchone()
     conn.close()
     return _row_to_response(row)
 

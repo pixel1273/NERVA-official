@@ -25,11 +25,6 @@ async function request(path, options = {}) {
     headers,
   });
 
-  if (res.status === 401) {
-    localStorage.removeItem('nerva_token');
-    window.location.href = '/login';
-  }
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || `API error ${res.status}`);
@@ -87,11 +82,6 @@ export const classifyImage = async (file) => {
     headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     body: formData,
   });
-
-  if (res.status === 401) {
-    localStorage.removeItem('nerva_token');
-    window.location.href = '/login';
-  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

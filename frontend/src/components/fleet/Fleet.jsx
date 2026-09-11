@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Truck, AlertCircle, CheckCircle, XCircle, RotateCw } from 'lucide-react';
 import { fetchFleet, fetchSegments, rerouteFleet } from '../../data/api';
 import { NERMap } from '../map/NERMap';
+import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 import './Fleet.css';
 
@@ -16,6 +17,7 @@ export function FleetPage() {
   const [segments, setSegments] = useState([]);
   const [rerouteResult, setRerouteResult] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => { loadFleet(); }, []);
 
@@ -47,8 +49,8 @@ export function FleetPage() {
     <div className="fleet-page">
       <header className="page-header">
         <div>
-          <h2 className="page-title">Fleet Tracking — Central Command</h2>
-          <p className="page-subtitle">Monitor all supply vehicles across the NER in real-time</p>
+          <h2 className="page-title">{t('fleet.title')}</h2>
+          <p className="page-subtitle">{t('fleet.subtitle')}</p>
         </div>
         <button className="btn-primary reroute-btn" onClick={handleMassReroute}>
           <RotateCw size={16} /> Mass Reroute (Block Dimapur→Kohima)
@@ -97,13 +99,13 @@ export function FleetPage() {
         <table className="fleet-table">
           <thead>
             <tr>
-              <th>Vehicle ID</th>
+              <th>{t('fleet.vehicle_id')}</th>
               <th>Type</th>
               <th>Driver</th>
               <th>Cargo</th>
               <th>Origin → Destination</th>
-              <th>Position</th>
-              <th>Status</th>
+              <th>{t('fleet.location')}</th>
+              <th>{t('fleet.status')}</th>
             </tr>
           </thead>
           <tbody>

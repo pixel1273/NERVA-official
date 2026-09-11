@@ -14,13 +14,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-error)' }}>
-        <h2>Access Denied</h2>
-        <p>You do not have permission to view this page.</p>
-      </div>
-    );
+  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.user_type)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

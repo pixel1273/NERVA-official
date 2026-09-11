@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { InstallBanner } from './InstallBanner';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import './Layout.css';
 
 export function Layout() {
@@ -18,6 +19,7 @@ export function Layout() {
   return (
     <div className="app-layout">
       <InstallBanner />
+      <LanguageSwitcher />
 
       {/* Mobile hamburger */}
       <button

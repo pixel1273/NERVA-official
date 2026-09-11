@@ -15,12 +15,13 @@ def create_incident(data: IncidentCreate) -> IncidentResponse:
     cursor = conn.cursor()
     cursor.execute(
         """INSERT INTO incidents (title, description, type, severity, latitude, longitude, location_name, district, state, photo_url, reported_by)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
         (data.title, data.description, data.type, data.severity, data.latitude, data.longitude,
          data.location_name, data.district, data.state, data.photo_url, data.reported_by)
     )
+    new_id = cursor.fetchone()["id"]
     conn.commit()
-    row = cursor.execute("SELECT * FROM incidents WHERE id = ?", (cursor.lastrowid,)).fetchone()
+    row = cursor.execute("SELECT * FROM incidents WHERE id = %s", (new_id,)).fetchone()
     conn.close()
     return _row_to_response(row)
 
@@ -74,16 +75,16 @@ def get_incidents(district: Optional[str] = None, severity: Optional[str] = None
     params = []
 
     if district:
-        query += " AND district = ?"
+        query += " AND district = %s"
         params.append(district)
     if severity:
-        query += " AND severity = ?"
+        query += " AND severity = %s"
         params.append(severity)
     if status:
-        query += " AND status = ?"
+        query += " AND status = %s"
         params.append(status)
 
-    query += " ORDER BY created_at DESC LIMIT ?"
+    query += " ORDER BY created_at DESC LIMIT %s"
     params.append(limit)
 
     rows = conn.execute(query, params).fetchall()
@@ -93,7 +94,7 @@ def get_incidents(district: Optional[str] = None, severity: Optional[str] = None
 
 def get_incident(incident_id: int) -> Optional[IncidentResponse]:
     conn = get_connection()
-    row = conn.execute("SELECT * FROM incidents WHERE id = ?", (incident_id,)).fetchone()
+    row = conn.execute("SELECT * FROM incidents WHERE id = %s", (incident_id,)).fetchone()
     conn.close()
     return _row_to_response(row) if row else None
 
@@ -104,13 +105,13 @@ def update_incident(incident_id: int, data: IncidentUpdate) -> Optional[Incident
     params = []
 
     if data.status is not None:
-        updates.append("status = ?")
+        updates.append("status = %s")
         params.append(data.status)
     if data.severity is not None:
-        updates.append("severity = ?")
+        updates.append("severity = %s")
         params.append(data.severity)
     if data.description is not None:
-        updates.append("description = ?")
+        updates.append("description = %s")
         params.append(data.description)
 
     if not updates:
@@ -120,9 +121,9 @@ def update_incident(incident_id: int, data: IncidentUpdate) -> Optional[Incident
     updates.append("updated_at = datetime('now')")
     params.append(incident_id)
 
-    conn.execute(f"UPDATE incidents SET {', '.join(updates)} WHERE id = ?", params)
+    conn.execute(f"UPDATE incidents SET {', '.join(updates)} WHERE id = %s", params)
     conn.commit()
-    row = conn.execute("SELECT * FROM incidents WHERE id = ?", (incident_id,)).fetchone()
+    row = conn.execute("SELECT * FROM incidents WHERE id = %s", (incident_id,)).fetchone()
     conn.close()
     return _row_to_response(row) if row else None
 
