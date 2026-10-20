@@ -4,7 +4,7 @@
 > **AI-Based Smart Logistics and Accessibility Intelligence Platform for North Eastern Region (NER)**
 
 ---
-**Worked with : https://github.com/bhuiadrija-cyber**
+
 ## 📋 Problem Statement
 
 | Field               | Details                                                    |
